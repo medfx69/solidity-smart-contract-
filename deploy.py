@@ -22,6 +22,11 @@ compile_sol = compile_standard(
 with open("compiled_code.json", "w") as file:
 	json.dump(compile_sol, file)
 
-bytcode = compile_sol["contracts"]["SimpleStorage.sol"]["SimpleStorage"]["evm"]["bytecode"]["object"]
+bytecode = compile_sol["contracts"]["SimpleStorage.sol"]["SimpleStorage"]["evm"]["bytecode"]["object"]
 abi = compile_sol["contracts"]["SimpleStorage.sol"]["SimpleStorage"]["abi"]
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
+chain_id = 5777
+my_address = "0xD1Ddab48e4208ba9931e88d4dA5D39eED24fB86F"
+private_key = "0x4b2c59339260a6f95a86b049aec5ad966ca2d24e8b2266cdda425d3dd8625158"
+SimpleStorge = w3.eth.contract(abi=abi, bytecode=bytecode)
+print(SimpleStorge)
