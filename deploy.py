@@ -25,8 +25,26 @@ with open("compiled_code.json", "w") as file:
 bytecode = compile_sol["contracts"]["SimpleStorage.sol"]["SimpleStorage"]["evm"]["bytecode"]["object"]
 abi = compile_sol["contracts"]["SimpleStorage.sol"]["SimpleStorage"]["abi"]
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
-chain_id = 5777
-my_address = "0xD1Ddab48e4208ba9931e88d4dA5D39eED24fB86F"
-private_key = "0x4b2c59339260a6f95a86b049aec5ad966ca2d24e8b2266cdda425d3dd8625158"
+chain_id = 1337
+my_address = "0xB77c014a8f3845B27f21Cf84b6E40408Ab8B712D"
+private_key = "0xb0effe976311b93be858ed339cc324b7f59f96d12162afa642d3973e081a033b"
 SimpleStorge = w3.eth.contract(abi=abi, bytecode=bytecode)
-print(SimpleStorge)
+nonce = w3.eth.getTransactionCount(my_address)
+transaction = SimpleStorge.constructor().buildTransaction({
+	"chainId":chain_id, "from":my_address, "nonce":nonce
+})
+signed_txn = w3.eth.account.sign_transaction(transaction, private_key=private_key)
+tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+#working with the contract
+
+simple_storge = w3.eth.contract(address=tx_receipt.contractAddress, abi=abi)
+store_transaction = simple_storge.functions.store(15).buildTransaction({
+	"chainId":chain_id, "from":my_address, "nonce":nonce +1
+})
+
+signed_store_txn = w3.eth.account.sign_transaction(store_transaction, private_key=private_key)
+send_store_tx = w3.eth.send_raw_transaction(signed_store_txn.rawTransaction)
+tx_stor_receipt = w3.eth.wait_for_transaction_receipt(send_store_tx)
+print(simple_storge.functions.retrieve().call())
